@@ -15,31 +15,39 @@ template <typename T> static inline tag <ostream> operator <<(tag <ostream> os, 
 template <typename T> static inline tag <ostream> operator <<(tag <ostream> os, set <T> const& s){ vector <T> v; for (auto i: s) v.push_back(i); os.get()<<"["; for (int i=0; i<v.size(); i++) if (i!=v.size()-1) os.get()<<v[i]<<", "; else os.get()<<v[i]; return os.get()<<"]", os; }
 
 int ai[300010];
+vector<int> nimber(1e7,-1);
 
 void solve(){
     int n; cin >> n;
-    int np = 0, p = 0, ones = 0;
+    int tmp;
+    int ans = 0;
     for(int i = 0; i < n; i++){
-        cin >> ai[i];
-        if(ai[i] == 1){
-            ones++;
-            continue;
-        }
-        if(ai[i] == 2){
-            continue;
-        }
-        if(ai[i] & 1){
-            np++;
-        } else {
-            p++;
-        }
+        cin >> tmp;
+        ans ^= nimber[tmp];
     }
-    
+    if(ans){
+        cout << "Alice\n";
+    } else {
+        cout << "Bob\n";
+    }
 }
 
  
 int32_t main(){
     BOOST;
+
+    nimber[0] = 0;
+    nimber[1] = 1;
+    int nim_ctr = -1;
+    for(int i = 2; i <= 1e7; i++){
+        if(i == 3) nim_ctr++;
+        if(nimber[i] == -1){
+            nim_ctr++;
+            for(int j = i; j <= 1e7; j += i){
+                if(nimber[j] == -1) nimber[j] = nim_ctr;
+            }
+        }
+    }
  
     int q = 1; cin >> q;
     while(q--){
