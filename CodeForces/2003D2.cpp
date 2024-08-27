@@ -63,8 +63,7 @@ void solve(){
         mex2 = 0;
         for(int j = 0; j < li[i] && ctr > 0; j++){
             if(ansik == aij[i][j]) ansik++;
-            else if(ansik > aij[i][j]) continue;
-            else {
+            else if(ansik < aij[i][j]){
                 mex2 = mex1;
                 mex1 = ansik;
                 ansik++;
