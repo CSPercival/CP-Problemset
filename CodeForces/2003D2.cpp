@@ -35,21 +35,38 @@ ll f1(long long x){
     return x * (x + 1) / 2;
 }
 
+pair<int,int> find_mexes(vector<int> &ai){
+    int mex1 = 0, mex2 = -1;
+    int ptr1 = 0;
+    for(int i = 0; i < ai.size(); i++){
+        if(ai[i] == mex1){
+            mex1++; 
+            continue;
+        }
+        if(ai[i] > mex1){
+            if(mex2 == -1){
+                mex2 = mex1;
+                mex1++;
+                i--;
+            } else {
+                break;
+            }
+        }
+    }
+    if(mex2 == -1){
+        mex2 = mex1;
+        mex1++;
+    }
+    return {mex1,mex2};
+}
+
 void solve(){
     ll n; cin >> n;
     ll m; cin >> m;
 
     tmpv.clear();
-    for(int i = 0; i <= n + 2; i++){
-        graph[i].clear();
-    }
-
-    int ctr = 0;
-    ll ansik;
     ll all_top = 0, double_top = 0, min_top = 0;
-    ll mex1, mex2;
     ll ans = 0;
-    // cout << "---------------\n";
     for(int i = 0; i < n; i++){
         cin >> li[i];
         aij[i].resize(li[i]);
@@ -57,40 +74,16 @@ void solve(){
             cin >> aij[i][j]; 
         }
         sort(all(aij[i]));
-        ctr = 2;
-        ansik = 0;
-        mex1 = 0;
-        mex2 = 0;
-        for(int j = 0; j < li[i] && ctr > 0; j++){
-            if(ansik == aij[i][j]) ansik++;
-            else if(ansik < aij[i][j]){
-                mex2 = mex1;
-                mex1 = ansik;
-                ansik++;
-                j--;
-                ctr--;
-            }
-        }
-        if(ctr == 2){
-            mex2 = ansik;
-            mex1 = ansik + 1;
-        }
-        if(ctr == 1){
-            mex2 = mex1;
-            mex1 = ansik;
-        }
-
-        // cout << mex2 << " - " << mex1 << "\n";
-
-        tmpv.push_back({mex2,mex1});
-        // deg[mex2]++;
-        // graph[mex1].push_back(mex2);
-        min_top = max(min_top, mex2);
-        all_top = max(all_top, mex1);
+        
+        pair<int,int> tmpp = find_mexes(aij[i]);
+        tmpv.push_back({tmpp.nd,tmpp.st});
+        min_top = max(min_top, tmpp.nd);
+        all_top = max(all_top, tmpp.st);
     }
     for(int i = 0; i <= all_top; i++){
         deg[i] = 0;
         vis[i] = 0;
+        graph[i].clear();
     }
     for(auto i : tmpv){
         deg[i.first]++;
@@ -101,22 +94,17 @@ void solve(){
         if(!vis[i]){
             dfs(i, i);
         }
-        // cout << vis[i] << " ";
     }
-    // cout << "\n";
 
     for(int i = 0; i <= all_top; i++){
         if(deg[i] >= 2){
             double_top = max(double_top, vis[i]);
         }
     }
-    // cout << double_top << "\n";
     for(int i = 0; i <= min(all_top, m); i++){
-        // cout << i << " " << vis[i] << "\n";
         ans += max({vis[i], double_top, i, min_top});
     }
     cout << ans + f1(m) - f1(min(all_top, m)) << "\n";
-    // cout << f1(m) - f1(min(ans,m)) + (min(ans,m) + 1) * ans << "\n";
 }
 
  
