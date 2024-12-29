@@ -8,23 +8,16 @@ struct SegmentTreePURQ{
     SegmentTreePURQ(int in_n){
         n = in_n;
         while(shift < n) shift <<= 1;
-        t.assign(shift * 2, 0);
-        for(int i = 0; i < n; i++){
-            t[i + shift] = 1;
-        }
-        for(int i = shift - 1; i > 0; i--) t[i] = t[i << 1] + t[(i << 1) + 1];
+        t.assign(2 * shift, 0);
     }
 
-    int query(int k){
-        int idx = 1;
-        while(idx < shift){
-            idx <<= 1;
-            if(t[idx] < k){
-                k -= t[idx];
-                idx++;
-            }
+    int query(int l, int r){
+        int ans = 0;
+        for(l += shift, r += shift; l < r; l >>= 1, r >>= 1){
+            if(l & 1) ans += t[l++];
+            if(r & 1) ans += t[--r];
         }
-        return idx - shift;
+        return ans;
     }
 
     void update(int idx, int val){
@@ -41,23 +34,26 @@ struct SegmentTreePURQ{
 int main(){
     BOOST;
     int n; cin >> n;
-    vector<int> ai(n);
-    for(int i = 0; i < n; i++){
+    vector<int> ai(2 * n);
+    for(int i = 0; i < 2 * n; i++){
         cin >> ai[i];
     }
-
-    SegmentTreePURQ ds(n);
+    vector<int> vis(n + 1, -1);
+    SegmentTreePURQ ds(2 * n);
     // ds.print();
 
-    vector<int> ans(n,0);
-    for(int i = n - 1; i >= 0; i--){
-        ans[i] = ds.query(i - ai[i] + 1);
-        // cout << i - ai[i] << " " << ans[i] << "\n";
-        ds.update(ans[i], 0);
-        // ds.print();
+    vector<int> ans(n);
+    for(int i = 0; i < 2 * n; i++){
+        if(vis[ai[i]] == -1){
+            vis[ai[i]] = i;
+        } else {
+            ans[ai[i] - 1] = ds.query(vis[ai[i]], i);
+            ds.update(vis[ai[i]], 1);
+        }
     }
+
     for(int i = 0; i < n; i++){
-        cout << ans[i] + 1 << " ";
+        cout << ans[i] << " ";
     }
     cout << "\n";
 }
