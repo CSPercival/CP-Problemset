@@ -16,7 +16,13 @@ template <typename T> static inline tag <ostream> operator <<(tag <ostream> os, 
 
 
 void solve(){
-    int n; cin >> n;
+    // int n; cin >> n;
+    int l,r; cin >> l >> r;
+    if(l == 1 && r == 1){
+        cout << "1\n";
+        return;
+    }
+    cout << r - l << "\n";
 }
 
  
