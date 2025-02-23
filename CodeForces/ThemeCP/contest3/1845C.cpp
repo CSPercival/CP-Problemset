@@ -1,3 +1,4 @@
+//Rating 1400
 #include<bits/stdc++.h>
 #define st first
 #define nd second
