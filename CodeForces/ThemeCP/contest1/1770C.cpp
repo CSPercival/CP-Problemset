@@ -1,10 +1,11 @@
+//Rating 1700
 #include<bits/stdc++.h>
 #define st first
 #define nd second
 #define all(x) x.begin(), x.end()
 #define BOOST cin.tie(NULL); ios_base::sync_with_stdio(false);
  
-// #define int ll
+#define int ll
 typedef long long ll;
 
 using namespace std;
@@ -17,39 +18,36 @@ template <typename T> static inline tag <ostream> operator <<(tag <ostream> os, 
 
 void solve(){
     int n; cin >> n;
-    vector<int> ai(n + 1);
-    vector<int> pxor(n + 1, 0);
-    for(int i = 1; i <= n; i++){ 
-        cin >> ai[i];
-        pxor[i] = (pxor[i - 1] ^ ai[i]);
-    }
-    string s; cin >> s;
-    int ans0 = 0;
-    int allxor = pxor[n];
+    vector<int> ai(n);
     for(int i = 0; i < n; i++){
-        if(s[i] == '0'){
-            ans0 ^= ai[i + 1];
+        cin >> ai[i];
+    }
+    sort(all(ai));
+    for(int i = 1; i < n; i++){
+        if(ai[i] == ai[i - 1]){
+            cout << "NO\n";
+            return;
         }
     }
-
-    int q; cin >> q;
-    int tp;
-    int l,r,g;
-    while(q--){
-        cin >> tp;
-        if(tp == 1){
-            cin >> l >> r;
-            ans0 ^= (pxor[r] ^ pxor[l - 1]);
-        } else {
-            cin >> g;
-            if(g == 0){
-                cout << ans0 << " ";
-            } else {
-                cout << (ans0 ^ allxor) << " ";
+    vector<vector<int>> res(100, vector<int>(100, 0));
+    for(int d = 2; d < 100; d++){
+        for(int i = 0; i < n; i++){
+            res[d][ai[i] % d]++;
+        }
+        int flag = 1;
+        for(int i = 0; i < d; i++){
+            if(res[d][i] < 2){
+                flag = 0;
+                break;
             }
         }
+        if(flag){
+            cout << "NO\n";
+            return;
+        }
     }
-    cout << "\n";
+    cout << "YES\n";
+
 }
 
  

@@ -1,3 +1,4 @@
+//Rating 1600
 #include<bits/stdc++.h>
 #define st first
 #define nd second
@@ -17,15 +18,46 @@ template <typename T> static inline tag <ostream> operator <<(tag <ostream> os, 
 
 void solve(){
     int n; cin >> n;
-    // cout << (n + 1)/2 + (2 * n + 2)/3 << "\n";
-    cout << n + ((n - n/2) + 2) / 3 << "\n";
+    vector<int> ai(n + 1);
+    vector<int> pxor(n + 1, 0);
+    for(int i = 1; i <= n; i++){ 
+        cin >> ai[i];
+        pxor[i] = (pxor[i - 1] ^ ai[i]);
+    }
+    string s; cin >> s;
+    int ans0 = 0;
+    int allxor = pxor[n];
+    for(int i = 0; i < n; i++){
+        if(s[i] == '0'){
+            ans0 ^= ai[i + 1];
+        }
+    }
+
+    int q; cin >> q;
+    int tp;
+    int l,r,g;
+    while(q--){
+        cin >> tp;
+        if(tp == 1){
+            cin >> l >> r;
+            ans0 ^= (pxor[r] ^ pxor[l - 1]);
+        } else {
+            cin >> g;
+            if(g == 0){
+                cout << ans0 << " ";
+            } else {
+                cout << (ans0 ^ allxor) << " ";
+            }
+        }
+    }
+    cout << "\n";
 }
 
  
 int32_t main(){
     BOOST;
  
-    int q = 1;// cin >> q;
+    int q = 1; cin >> q;
     while(q--){
         solve();
     }

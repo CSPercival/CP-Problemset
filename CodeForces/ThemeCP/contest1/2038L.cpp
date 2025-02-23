@@ -1,10 +1,11 @@
+//Rating 1400
 #include<bits/stdc++.h>
 #define st first
 #define nd second
 #define all(x) x.begin(), x.end()
 #define BOOST cin.tie(NULL); ios_base::sync_with_stdio(false);
  
-#define int ll
+// #define int ll
 typedef long long ll;
 
 using namespace std;
@@ -17,43 +18,15 @@ template <typename T> static inline tag <ostream> operator <<(tag <ostream> os, 
 
 void solve(){
     int n; cin >> n;
-    vector<int> ai(n);
-    for(int i = 0; i < n; i++){
-        cin >> ai[i];
-    }
-    sort(all(ai));
-    for(int i = 1; i < n; i++){
-        if(ai[i] == ai[i - 1]){
-            cout << "NO\n";
-            return;
-        }
-    }
-    vector<vector<int>> res(100, vector<int>(100, 0));
-    for(int d = 2; d < 100; d++){
-        for(int i = 0; i < n; i++){
-            res[d][ai[i] % d]++;
-        }
-        int flag = 1;
-        for(int i = 0; i < d; i++){
-            if(res[d][i] < 2){
-                flag = 0;
-                break;
-            }
-        }
-        if(flag){
-            cout << "NO\n";
-            return;
-        }
-    }
-    cout << "YES\n";
-
+    // cout << (n + 1)/2 + (2 * n + 2)/3 << "\n";
+    cout << n + ((n - n/2) + 2) / 3 << "\n";
 }
 
  
 int32_t main(){
     BOOST;
  
-    int q = 1; cin >> q;
+    int q = 1;// cin >> q;
     while(q--){
         solve();
     }
