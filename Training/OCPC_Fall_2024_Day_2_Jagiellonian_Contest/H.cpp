@@ -57,6 +57,8 @@ struct Tree{
         }
         t[(idx << 1)] += p[idx];
         t[(idx << 1) + 1] += p[idx];
+        p[(idx << 1)] += p[idx];
+        p[(idx << 1) + 1] += p[idx];
         p[idx] = 0;
     }
 
@@ -113,35 +115,22 @@ void dfs2(int idx, int par, int dist, vector<int> &vals, vector<int> &v){
 }
 
 void dfs3(int idx, int par, int tid){
-    // cout << "o" << idx << endl;
     g[idx].ans = trees[tid].t.query();
-    // cout << g[idx].ans << endl;
+
     for(int i : g[idx].bie){
         if(i == par) continue;
-        // cerr << "ok1" << endl;
         trees[tid].t.Update(0, trees[tid].n - 1, 1);
-        // cerr << "ok2" << endl;
-        // cout << g[i].tl << " " << g[i].tr << endl;
         trees[tid].t.Update(g[i].tl, g[i].tr, -2);
-        // cerr << "ok3" << endl;
         dfs3(i, idx, tid);
-
         trees[tid].t.Update(g[i].tl, g[i].tr, 2);
         trees[tid].t.Update(0, trees[tid].n - 1, -1);
     }
 }
 
 void process_tree(int tid, vector<int> &v){
-    // cout << trees[tid].n << endl;
     vector<int> vals(trees[tid].n);
     dfs2(trees[tid].stv, 0, 0, vals, v);
-    // for(int i : vals){
-    //     cout << i << " "; 
-    // }
-    // cout << endl;
     trees[tid].t.build(trees[tid].n, vals);
-    // cout << "git" << endl;
-
     dfs3(trees[tid].stv, 0, tid);
 }
 
@@ -194,16 +183,11 @@ void solve(){
         }
     }
 
-    // for(int i = 1; i <= n; i++){
-    //     printf("tid %d = %d\n",i, g[i].tid);
-    // }
-
     int answer = 0;
     int idx = 0;
     vector<int> tmpv;
     while((!que.empty()) || (!tque.empty())){
         if(!tque.empty()){
-            // cout << tque.front() << "\n";
             process_tree(tque.front(), tmpv);
             tque.pop();
             for(int i : tmpv){
@@ -213,7 +197,6 @@ void solve(){
             continue;
         }
         idx = que.front();
-        // cout << idx << endl;
         que.pop();
         for(int v : g[idx].oute){
             g[v].ans = max(g[v].ans, g[idx].ans + 1);
