@@ -16,12 +16,21 @@ template <typename T> static inline tag <ostream> operator <<(tag <ostream> os, 
 
 
 void solve(){
-    int n; 
-    cin >> n;
-    vector<int> a(n);
-    for(int i = 0; i < n; i++){
-        cin >> a[i];
+    int k, a ,b ,x, y; 
+    cin >> k >> a >> b >> x >> y;
+    int ans = 0;
+    if(x > y){
+        swap(a,b);
+        swap(x,y);
     }
+    ans += max(0, (k - a + x) / x);
+    k -= ans * x;
+    ans += max(0, (k - b + y) / y);
+    cout << ans << '\n';
+    // vector<int> a(n);
+    // for(int i = 0; i < n; i++){
+    //     cin >> a[i];
+    // }
 }
 
  

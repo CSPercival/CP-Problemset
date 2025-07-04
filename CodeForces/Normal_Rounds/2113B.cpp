@@ -16,11 +16,18 @@ template <typename T> static inline tag <ostream> operator <<(tag <ostream> os, 
 
 
 void solve(){
-    int n; 
-    cin >> n;
-    vector<int> a(n);
-    for(int i = 0; i < n; i++){
-        cin >> a[i];
+    // int n; 
+    // cin >> n;
+    // vector<int> a(n);
+    // for(int i = 0; i < n; i++){
+        // cin >> a[i];
+    // }
+    int w,h,a,b; cin >> w >> h >> a >> b;
+    int x1,y1,x2,y2; cin >> x1 >> y1 >> x2 >> y2;
+    if((abs(x1 - x2) >= a && (abs(x1 - x2)) % a == 0) || ((abs(y1 - y2)) >= b && abs(y1 - y2) % b == 0)){
+        cout << "Yes\n";
+    } else {
+        cout << "No\n";
     }
 }
 
