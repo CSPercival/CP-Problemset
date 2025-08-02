@@ -14,14 +14,9 @@ template <typename Other> static inline tag <ostream> operator<<(tag <ostream> o
 template <typename T> static inline tag <ostream> operator <<(tag <ostream> os, vector <T> const& v){ os.get()<<"["; for (int i=0; i<v.size(); i++) if (i!=v.size()-1) os.get()<<v[i]<<", "; else os.get()<<v[i]; return os.get()<<"]", os; }
 template <typename T> static inline tag <ostream> operator <<(tag <ostream> os, set <T> const& s){ vector <T> v; for (auto i: s) v.push_back(i); os.get()<<"["; for (int i=0; i<v.size(); i++) if (i!=v.size()-1) os.get()<<v[i]<<", "; else os.get()<<v[i]; return os.get()<<"]", os; }
 
-vector<int> pred[200010];
-bool on_cycle[200010];
+vector<int> pred[400010];
+bool on_cycle[400010];
 ll k;
-
-bool check(ll del1, ll del2, ll dist){
-    if((del1 + dist) % k == del2) return true;
-    return false;
-}
 
 void find_cycle(int idx){
     on_cycle[idx] = 0;
@@ -38,27 +33,28 @@ ll vmod(ll x){
 }
 
 int bin_srch(vector<ll> &idxs, vector<pair<ll,ll>> &traf, ll pos){
-    //deb   cout << idxs << "\n";
-    //deb   cout << traf << "\n";
-    //deb   cout << pos << endl;
+    // cout << idxs << "\n";
+    // cout << traf << "\n";
+    // cout << pos << endl;
     // reverse(all(idxs));
-    //deb  cout << "bs0" << endl;
+    //deb  cout << "bs0" << endl;s
 
     if(traf[idxs[0]].st < pos) return -1;
     //deb  cout << "bs1" << endl;
-    if(pos <= traf[idxs.back()].st) return 0;
+    if(pos <= traf[idxs.back()].st) return idxs.back();
     //deb  cout << "bs2" << endl;
-    int po = idxs.size() - 1, ko = 0, sr;
-    while(po < ko){
+    int po = 0, ko = idxs.size() - 1, sr;
+    while(po + 1 < ko){
         sr = (po + ko)/2;
-        if(traf[idxs[sr]].st < pos){
-            po = sr - 1;
+        if(pos <= traf[idxs[sr]].st){
+            po = sr;
         } else {
             ko = sr;
         }
     }
+    // cout << po << " " << ko << "\n";
     //deb cout << "ko " << idxs[ko] << endl;
-    return idxs[ko];
+    return idxs[po];
 }
 
 void solve(){
@@ -113,24 +109,6 @@ void solve(){
     //deb }
     // mt.clear();
     //deb   cout << "git3" << endl;
-
-
-    // for(int i = 0; i < n; i++){
-    //     for(int j = i - 1; j >= 0; j--){
-    //         if(check(traf[i].nd, traf[j].nd, traf[i].st - traf[j].st)){
-    //             succ[i] = j + n;
-    //             pred[j + n].push_back(i);
-    //             break;
-    //         }
-    //     }
-    //     for(int j = i + 1; j < n; j++){
-    //         if(check(traf[i].nd, traf[j].nd, traf[j].st - traf[i].st)){
-    //             succ[i + n] = j;
-    //             pred[j].push_back(i + n);
-    //             break;
-    //         }
-    //     }
-    // }
 
     //deb   cout << succ;
     //deb   cout << endl;
