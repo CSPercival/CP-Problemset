@@ -14,29 +14,38 @@ template <typename Other> static inline tag <ostream> operator<<(tag <ostream> o
 template <typename T> static inline tag <ostream> operator <<(tag <ostream> os, vector <T> const& v){ os.get()<<"["; for (int i=0; i<v.size(); i++) if (i!=v.size()-1) os.get()<<v[i]<<", "; else os.get()<<v[i]; return os.get()<<"]", os; }
 template <typename T> static inline tag <ostream> operator <<(tag <ostream> os, set <T> const& s){ vector <T> v; for (auto i: s) v.push_back(i); os.get()<<"["; for (int i=0; i<v.size(); i++) if (i!=v.size()-1) os.get()<<v[i]<<", "; else os.get()<<v[i]; return os.get()<<"]", os; }
 
-int mod = 998244353;
+int mod = 998'244'353;
 
 void solve(){
     int n, x;
     cin >> n >> x;
-    if(x < n){
+    int limx = n * (n - 1)/2 + n - 1; 
+    if(x < limx){
         cout << "0\n";
         return;
     }
-    ll stp = (n *(n + 1)/2);
-    ll ssum = 0;
-    ll div = n - 1;
-    ll lim = 0;
-    for(int i = 0; i < n; i++){
-        lim += x - i;
+    vector<int> dp(x + 2, 0);
+    // int initial = (n + 1) * (n - 1) - n * (n + 1)/2;
+    int initial = max(0LL, (n + 1) * (n - 2)/2);
+    if(n + initial > x){
+        cout << "0\n";
+        return;
     }
-    ssum = (stp/div) * div;
-    while(ssum < stp) ssum += div;
-
-    int ans = 0;
-    while(ssum <= lim){
-        ans = (ans + )
+    dp[n + initial] = 1;
+    for(int i = 1; i < n; i++){
+        for(int j = 0; j <= x; j++){
+            if(i + j <= x){
+                dp[i + j] = (dp[i + j] + dp[j]) % mod;
+            }
+        }
+        // cout << i << " " << dp << "\n";
     }
+    ll ans = 0;
+    for(int j = 0; j <= x; j++){
+        dp[j + 1] = (dp[j + 1] + dp[j]) % mod;
+        ans = (ans + dp[j]) % mod;
+    }
+    cout << ans << "\n";
 }
 
  
