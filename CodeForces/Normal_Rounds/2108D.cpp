@@ -15,13 +15,100 @@ template <typename Other> static inline tag <ostream> operator<<(tag <ostream> o
 template <typename T> static inline tag <ostream> operator <<(tag <ostream> os, vector <T> const& v){ os.get()<<"["; for (int i=0; i<v.size(); i++) if (i!=v.size()-1) os.get()<<v[i]<<", "; else os.get()<<v[i]; return os.get()<<"]", os; }
 template <typename T> static inline tag <ostream> operator <<(tag <ostream> os, set <T> const& s){ vector <T> v; for (auto i: s) v.push_back(i); os.get()<<"["; for (int i=0; i<v.size(); i++) if (i!=v.size()-1) os.get()<<v[i]<<", "; else os.get()<<v[i]; return os.get()<<"]", os; }
 
+int ask(int idx){
+    cout << "? " << idx + 1 << "\n";
+    cout.flush();
+    int ans; cin >> ans;
+    return ans;
+}
+
+void answer(int a, int n){
+    cout << "! " << a;
+    if(a != -1){
+        cout << " " << n - a;
+    }
+    cout << "\n";
+    cout.flush();
+}
+
+int modk(int x, int k){
+    int ans = x % k;
+    if(ans < 0) ans += k;
+    return ans;
+}
 
 void solve(){
-    int n; 
-    cin >> n;
-    vector<int> a(n);
-    for(int i = 0; i < n; i++){
-        cin >> a[i];
+    int n, k; 
+    cin >> n >> k;
+    if(n == 2 * k){
+        answer(k,n);
+        return;
+    }
+    vector<int> a(k);
+    for(int i = 0; i < k; i++){
+        a[i] = ask(i);
+    }
+    vector<int> b(k);
+    for(int i = 1; i <= k; i++){
+        b[k - i] = ask(n - i);
+    }
+
+    int shift = n % k;
+    int bidx = -1, aidx;
+    for(int i = 0; i < k; i++){
+        if(a[(i + shift) % k] != b[i]){
+            bidx = i;
+            break;
+        }
+    }
+    if(bidx == -1){
+        answer(-1,0);
+        return;
+    }
+    aidx = (bidx + shift) % k;
+    // cout << "idx: " << aidx << " " << bidx << "\n";
+
+    int po = 0, ko = (n - 1)/k, sr;
+    // if(widx + shift >= k) po++;
+    if(ko * k + aidx >= n) ko--;
+    while(po + 1 < ko){
+        sr = (po + ko)/2;
+        if(ask(sr * k + aidx) == a[aidx]){
+            po = sr;
+        } else {
+            ko = sr;
+        }
+    }
+    int lima = max(po * k + aidx, k - 1);
+    int limb = min(ko * k + aidx, n - k);
+    // cout << lima << " -1- " << limb << "\n";
+    int ansa = lima;
+    int ansb = limb;
+    // cout << ansa << " -2- " << ansb << "\n";
+
+    for(int i = lima + 1; i < limb; i++){
+        // cout << "ask1 " << i << "\n";
+        if(ask(i) == a[modk(i,k)]){
+            ansa = max(ansa, i);
+        } else {
+            break;
+        }
+    }
+    for(int i = limb - 1; i > lima; i--){
+        // cout << "ask2 " << i << "\n";
+        if(ask(i) == b[modk(modk(i, k) - shift, k)]){
+            // ansb--;
+            ansb = min(ansb, i);
+        } else {
+            break;
+        }
+    }
+    // cout << ansa << " -3- " << ansb << "\n";
+
+    if(ansb <= ansa || ansa + 1 < ansb){
+        answer(-1, n);
+    } else {
+        answer(ansa + 1, n);
     }
 }
 

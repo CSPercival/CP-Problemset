@@ -17,11 +17,44 @@ template <typename T> static inline tag <ostream> operator <<(tag <ostream> os, 
 
 
 void solve(){
-    int n; 
-    cin >> n;
-    vector<int> a(n);
-    for(int i = 0; i < n; i++){
-        cin >> a[i];
+    int n, x; 
+    cin >> n >> x;
+    if(x == 1){
+        if(n == 2){
+            cout << "5\n";
+            return;
+        }
+    }
+    if(x == 0 && n == 1){
+        cout << "-1\n";
+        return;
+    }
+    int pot = 1;
+    while(pot <= x) pot <<= 1;
+
+    int tpot = pot;
+    int smpot, ipot = 0;
+    while(tpot > 0){
+        if(tpot & x){
+            ipot++;
+            smpot = tpot;
+        }
+        tpot >>= 1;
+    }
+    if(ipot >= n){
+        cout << x << "\n";
+        return;
+    }
+    int ans = 0;
+    n -= ipot;
+    if(n & 1){
+        if(x == 1 || x == 0){
+            cout << x + max(n - 3, 0) + 6 << "\n";
+        } else {
+            cout << x + n + 1 << "\n";
+        }
+    } else {
+        cout << x + n << "\n";
     }
 }
 

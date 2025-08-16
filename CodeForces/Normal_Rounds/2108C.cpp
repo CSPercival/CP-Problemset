@@ -19,10 +19,49 @@ template <typename T> static inline tag <ostream> operator <<(tag <ostream> os, 
 void solve(){
     int n; 
     cin >> n;
-    vector<int> a(n);
+    vector<int> oa(n);
+    vector<pair<int,int>> a(n);
+    map<int, vector<int>> where;
     for(int i = 0; i < n; i++){
-        cin >> a[i];
+        cin >> a[i].st;
+        a[i].nd = i;
+        where[a[i].st].push_back(i);
+        oa[i] = a[i].st;
     }
+    sort(all(a), greater<pair<int,int>>());
+
+    priority_queue<pair<int,int>> pq;
+    vector<int> c(n, 0);
+    int ans = 0;
+    // cout << a << "\n";
+    int new_idx;
+    // cout << oa << "\n";
+    // cout << a << "\n";
+    for(int i = 0; i < n; i++){
+        while(pq.size() && c[pq.top().nd]) pq.pop();
+        // cout << a[i].st << " " << a[i].nd << "            ";
+        // if(pq.size()) cout << pq.top().st << " " << pq.top().nd;
+        // cout << "\n";
+        if(pq.empty() || pq.top().st != a[i].st){
+            ans++;
+            // cout << "ans++\n";
+            while(c[where[a[i].st].back()]) where[a[i].st].pop_back(); 
+            new_idx = where[a[i].st].back();
+            where[a[i].st].pop_back();     
+        } else {
+            pair<int,int> tmpp = pq.top();
+            pq.pop();
+            new_idx = tmpp.nd;
+        }
+        c[new_idx] = 1;
+        if(!c[max(0, new_idx - 1)]){
+            pq.push({oa[new_idx - 1], new_idx - 1});
+        }
+        if(!c[min(n - 1, new_idx + 1)]){
+            pq.push({oa[new_idx + 1], new_idx + 1});
+        }
+    }
+    cout << ans << "\n";
 }
 
  
