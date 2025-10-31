@@ -7,75 +7,55 @@
  
 // #define int ll
 typedef long long ll;
-
+ 
 using namespace std;
 template <typename T> struct tag:reference_wrapper <T>{ using reference_wrapper <T>::reference_wrapper; };
 template <typename T1, typename T2> static inline tag <ostream> operator<<(tag <ostream> os, pair<T1, T2> const& p){ return os.get()<<"{"<<p.first<<", "<<p.second<<"}", os;}
 template <typename Other> static inline tag <ostream> operator<<(tag <ostream> os, Other const& o){ os.get()<<o; return os; }
 template <typename T> static inline tag <ostream> operator <<(tag <ostream> os, vector <T> const& v){ os.get()<<"["; for (int i=0; i<v.size(); i++) if (i!=v.size()-1) os.get()<<v[i]<<", "; else os.get()<<v[i]; return os.get()<<"]", os; }
 template <typename T> static inline tag <ostream> operator <<(tag <ostream> os, set <T> const& s){ vector <T> v; for (auto i: s) v.push_back(i); os.get()<<"["; for (int i=0; i<v.size(); i++) if (i!=v.size()-1) os.get()<<v[i]<<", "; else os.get()<<v[i]; return os.get()<<"]", os; }
-
+ 
 const int mod = 1e9 + 7;
-
-struct KMP{
-    int n;
-    int pat_len;
-    int mult;
-    string text;
-    vector<int> pi;
-
-    int curr_idx;
-    KMP(string intext, string inpattern, int inmult){
-        mult = inmult;
-        pat_len = inpattern.size();
-        text = "#" + inpattern + "$" + intext;
-        n = text.size();
-        pi.resize(n + 1, 0);
-        compute_pi_();
-        curr_idx = 1 + pat_len;
-    }
-
-    void compute_pi_(){
-        for(int i = 2; i < n; i++){
-            int idx = i - 1;
-            while(text[i] != text[pi[idx] + 1] && idx > 0) idx = pi[idx];
-            if(text[i] == text[pi[idx] + 1]){
-                pi[i] = pi[idx] + 1;
-            }
+int pi[1005010];
+void compute_pattern(string text, vector<vector<int>> &moves, int pat_len){
+    int n = text.size();
+    int pidx = 0;
+    pi[0] = 0;
+    for(int i = 1; i < n; i++){
+        pidx = pi[i - 1];
+        while(pidx > 0 && text[i] != text[pidx]) pidx = pi[pidx - 1];
+        if(text[i] == text[pidx]) pidx++;
+        pi[i] = pidx;
+        if(pi[i] == pat_len){
+            moves[i - pat_len].push_back(pat_len);
         }
-        // cout << pi << "\n";
     }
-    int match(int idx){
-        return pi[idx + pat_len + 2] == pat_len;
-    }
-    int shift(int idx){
-        return max(-1, idx - pat_len);
-    }
-};
-
+}
+ 
 void solve(){
     string text;
     cin >> text;
     int n = text.size();
     int k; cin >> k;
-    // vector<string> dict;
     string pat;
-    vector<KMP> moves;
-    vector<ll> dp(n + 2);
+    vector<vector<int>> moves(n + 2);
+    vector<int> dp(n + 2);
+    text = "#" + text;
     for(int i = 0; i < k; i++){
         cin >> pat;
-        moves.push_back(KMP(text, pat, 1));
+        compute_pattern(pat + text, moves, pat.size());
     }
     dp[0] = 1;
-    for(int i = 0; i < n; i++){
-        for(int j = 0; j < k; j++){
-            dp[i + 1] += dp[moves[j].shift(i) + 1] * moves[j].match(i);
+    for(int i = 1; i <= n; i++){
+        for(auto move : moves[i]){
+            // dp[i] = (dp[i] + dp[i - move]) % mod; 
+            dp[i] += dp[i - move];
+            if(dp[i] > mod) dp[i] -= mod;
         }
     }
     cout << dp[n] << "\n";
-    // KMP kmp(text, pat, 1);
 }
-
+ 
  
 int32_t main(){
     BOOST;
