@@ -10,15 +10,16 @@ typedef long long ll;
 
 int n, q;
 int np;
+int dlim, plim;
 vector<int> p2i;
 vector<int> i2p;
 vector<int> sievev;
 
 struct AnsTracker{
     vector<int> ir; // ir[i] = ile roznic ktore zgarniaja 'i' kamieni
-    vector<unordered_map<int,int>> strats// strats[i][j] = ile kamieni zgarnia skok co 'i' z przesunieciem 'j'
+    vector<unordered_map<int,int>> strats; // strats[i][j] = ile kamieni zgarnia skok co 'i' z przesunieciem 'j'
     int curr_max;   // odpowiedz
-    AnsTracker(int n){
+    AnsTracker(){
         ir.resize(q + 1);
         strats.resize(np + 1);
         curr_max = 0;
@@ -51,23 +52,121 @@ struct AnsTracker{
 };
 
 struct SituationTracker{
-    
-    SituationTracker(){
-
+    AnsTracker *ans_bender;
+    vector<int> a;
+    int dctr = 0;
+    // set<int> smalld;
+    // set<int> bigd;
+    set<int> setd[2];
+    SituationTracker(AnsTracker *in_ab){
+        a.resize(n + 1);
+        ans_bender = in_ab;
     }
-}
+
+    void transfer_to_small(){
+        int diff;
+        for(int idx : setd[1]){
+            for(int i : setd[0]){
+                diff = abs(i - idx);
+                if(sievev[diff] != 0) diff = sievev[diff];
+                if(diff < i2p[plim]) continue;
+                ans_bender->add(diff, idx % diff);
+            }
+            setd[0].insert(idx);
+        }
+        setd[1].clear();
+    }
+
+    void add_small(int idx){
+        int diff;
+        for(int i = 0; i < plim; i++){
+            ans_bender->add(i2p[i], idx % i2p[i]);
+        }
+        for(int i : setd[0]){
+            diff = abs(i - idx);
+            if(sievev[diff] != 0) diff = sievev[diff];
+            if(diff < i2p[plim]) continue;
+            ans_bender->add(diff, idx % diff);
+        }
+        setd[0].insert(idx);
+    }
+
+    void add_big(int idx){
+        int diff;
+        for(int i = 0; i < plim; i++){
+            ans_bender->add(i2p[i], idx % i2p[i]);
+        }
+        setd[1].insert(idx);
+    }
+
+    void del_small(int idx){
+        int diff;
+        for(int i = 0; i < plim; i++){
+            ans_bender->del(i2p[i], idx % i2p[i]);
+        }
+        for(int i : setd[0]){
+            diff = abs(i - idx);
+            if(sievev[diff] != 0) diff = sievev[diff];
+            if(diff < i2p[plim]) continue;
+            ans_bender->del(diff, idx % diff);
+        }
+        setd[0].erase(idx);
+        if(dctr - 1 <= dlim)
+            transfer_to_small();
+    }
+
+    void del_big(int idx){
+        for(int i = 0; i < plim; i++){
+            ans_bender->del(i2p[i], idx % i2p[i]);
+        }
+        setd[1].erase(idx);
+        if(dctr - 1 <= dlim)
+            transfer_to_small();
+    }
+
+    int add(int idx){
+        if(dctr < dlim){
+            add_small(idx);
+            dctr++;
+            return 1;
+        } else {
+            add_big(idx);
+            dctr++;
+            return 2;
+        }
+    }
+
+    void del(int idx){
+        if(a[idx] == 1){
+            del_small(idx);
+        } else {
+            del_big(idx);
+        }
+        dctr--;
+    }
+
+    int modify(int ai){
+        if(a[ai] == 0){
+            a[ai] = add(ai);
+        } else {
+            del(ai);
+            a[ai] = 0;
+        }
+        return max(min(dctr, 2),ans_bender->get_ans());
+    }
+};
 
 void sieve(int lim){
-    sievev.assign(lim + 1, 1);
+    sievev.assign(lim + 1, 0);
     p2i.resize(lim + 1);
-    sievev[0] = 0;
-    sievev[1] = 0;
-    for(int i = 2; i * i <= lim; i++){
-        if(sievev[i]){
+    sievev[0] = 1;
+    sievev[1] = 1;
+    for(int i = 2; i <= lim; i++){
+        if(!sievev[i]){
             p2i[i] = i2p.size();
             i2p.push_back(i);
-            for(int j = i * i; j <= lim; j += i){
-                sievev[j] = 0;
+            for(int j = i + i; j <= lim; j += i){
+                sievev[j] = j;
             }
         }
     }
@@ -77,8 +176,16 @@ void sieve(int lim){
 int32_t main(){
     BOOST;
     cin >> n >> q;
-    sieve(n);
-    AnsTracker ans_bender(n);
-
+    sieve(2e7 + 10);
+    AnsTracker ans_bender;
+    dlim = 2160;
+    // plim = min(1150, np);
+    plim = 1150;
+    SituationTracker situation_bender(&ans_bender);
+    int ai;
+    while(q--){
+        cin >> ai;
+        cout << situation_bender.modify(ai) << "\n";
+    }
     return 0;
 }
