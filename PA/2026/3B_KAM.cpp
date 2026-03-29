@@ -14,11 +14,14 @@ struct node {
     int mc = 0;
     int ectr = 0;
     void add(int x, int cx){
+        // cout << "ADD " <<  << " " << x << " " << cx << "\n";
         if(e[cx].count(x)) return;
         e[cx].insert(x);
         ectr++;
     }
     void del(int x, int cx){
+        // cout << "DEL " << x << " " << cx << "\n";
+        if(!e.count(cx)) return;
         auto it = e[cx].find(x);
         if(it == e[cx].end()) return;
         e[cx].erase(it);
@@ -27,18 +30,81 @@ struct node {
     }
 };
 
+void print_g(vector<node> &g){
+    cout << "GRAPH: \n";
+    for(int i = 0; i < (int)g.size(); i++){
+        cout << i << " color: " << g[i].mc << " deg: " << g[i].ectr << "\n";
+        for(auto &col : g[i].e){
+            cout << "(" << col.st << ")\n       ";
+            for(int u : col.nd){
+                cout << u << " ";
+            }
+            cout << "\n";
+        }
+    }
+    cout << "------------------------------------------------------------" << endl;
+}
+
+void print_status(vector<node> &g, vector<set<int>> &col_alive, queue<int> to_del){
+    cout << "ALIVE\n";
+    for(int i = 1; i < (int)col_alive.size(); i++){
+        cout << "COLOR: " << i << ": ";
+        for(int v : col_alive[i]){
+            cout << v << " ";
+        }
+        cout << "\n";
+        for(int v : col_alive[i]){
+            cout << "edges " << v << ": ";
+            for(auto &col : g[v].e){
+                cout << "(" << col.st << ") ";
+                for(int u : col.nd){
+                    cout << u << " ";
+                }
+            }
+            cout << "\n";
+        }
+    }
+    cout << "DEAD\n";
+    for(int i = 1; i < (int)g.size(); i++){
+        if(g[i].mc == 0){
+            cout << "edges " << i << ": ";
+            for(auto &col : g[i].e){
+                cout << "(" << col.st << ") ";
+                for(int u : col.nd){
+                    cout << u << " ";
+                }
+            }
+            cout << "\n";
+        }
+    }
+    cout << "TO KILL\n";
+    while(!to_del.empty()){
+        cout << to_del.front() << " ";
+        to_del.pop();
+    }
+    cout << "\n";
+    cout << "------------------------------------------------------------" << endl;
+}
+
+// int dfs_ctr = 0;
+
 void dfs(int idx, int contr_col, vector<int> &mstack, vector<int> &vis, vector<node> &g){
+    // cout << dfs_ctr << " " << idx << endl;
     vis[idx] = 1;
     mstack.push_back(idx);
     for(auto &col : g[idx].e){
         for(int i : col.nd){
             if(vis[i] || g[i].mc != contr_col) continue;
+            // dfs_ctr++;
+            // cout << i << endl;
             dfs(i, contr_col, mstack, vis, g);
+            // dfs_ctr--;
         }
     }
 }
 
 void contract_v(int v, int u, vector<node> &g){
+    // cout << "Merge: " << v << " <-- " << u << endl;
     int cv = g[v].mc, cu = g[u].mc;
     for(auto &col : g[u].e){
         for(int i : col.nd){
@@ -72,9 +138,12 @@ void contract_v(int v, int u, vector<node> &g){
     // }
     // if(g[v].count(u)) g[v].erase(u);
     // g[u].erase(v);
+    // cout << "Merge finished: " << v << " <-- " << u << endl;
+
 }
 
 void contract_dead_v(int v, int u, vector<node> &g, vector<set<int>> &col_alive, queue<int> &to_del){
+    // cout << "Merge dead: " << v << " <-- " << u << endl;
     int vel, uel;
     for(auto &col : g[u].e){
         if(col.st == 0) continue;
@@ -105,6 +174,7 @@ void contract_dead_v(int v, int u, vector<node> &g, vector<set<int>> &col_alive,
             g[uel].add(v, 0);
         }
     }
+    // cout << "Merge dead finished: " << v << " <-- " << u << endl;
 }
 
 int contract_cc(int sidx, int contr_col, vector<int> &vis, vector<node> &g){
@@ -113,7 +183,8 @@ int contract_cc(int sidx, int contr_col, vector<int> &vis, vector<node> &g){
     int best_v = -1;
     int max_deg = -1, tdeg;
     for(int v : to_contract){
-        tdeg = g[v].ectr - (int)g[v].e[g[v].mc].size();
+        // tdeg = g[v].ectr - (int)g[v].e[g[v].mc].size();
+        tdeg = g[v].ectr - (g[v].e.count(g[v].mc) ? (int)g[v].e[g[v].mc].size() : 0);
         // for(int j : g[v]){
         //     if(col[v] != col[j]) tdeg++;
         // }
@@ -130,17 +201,22 @@ int contract_cc(int sidx, int contr_col, vector<int> &vis, vector<node> &g){
 }
 
 void contract_dead_cc(int idx, vector<node> &g, vector<set<int>> &col_alive, queue<int> &to_del){
+    // cout << "Contract cc of dead " << idx << "\n";
     if(!g[idx].e.count(0)) return;
+    // cout << "Dead neighbours ";
     vector<int> tmpv;
-    int best_v = -1;
-    int max_deg = -1;
+    int best_v = idx;
+    int max_deg = g[idx].ectr;
+    tmpv.push_back(idx);
     for(int i : g[idx].e[0]){
+        // cout << i << " ";
         if(max_deg < g[i].ectr){
             max_deg = g[i].ectr;
             best_v = i;
         }
         tmpv.push_back(i);
     }
+    // cout << endl;
     for(int i : tmpv){
         if(i == best_v) continue;
         contract_dead_v(best_v, i, g, col_alive, to_del);
@@ -148,27 +224,31 @@ void contract_dead_cc(int idx, vector<node> &g, vector<set<int>> &col_alive, que
 }
 
 void kill_v(int idx, vector<node> &g, vector<set<int>> &col_alive, queue<int> &to_del){
+    // cout << "KILLING " << idx << endl;
     vector<int> tmpv;
     int best_v = -1;
     int max_deg = -1;
     int mc = g[idx].mc;
     for(auto &col : g[idx].e){
-        if(col.st == 0 || col.nd.size() <= 1) continue;
-        best_v = -1;
-        max_deg = -1;
-        for(int i : col.nd){
-            if(max_deg < g[i].ectr){
-                max_deg = g[i].ectr;
-                best_v = i;
+        if(col.st == 0) continue;
+        assert(col.nd.size() > 0);
+        best_v = (*(col.nd.begin()));
+        if(col.nd.size() > 1){
+            max_deg = -1;
+            for(int i : col.nd){
+                if(max_deg < g[i].ectr){
+                    max_deg = g[i].ectr;
+                    best_v = i;
+                }
+                tmpv.push_back(i);
             }
-            tmpv.push_back(i);
+            for(int i : tmpv){
+                if(i == best_v) continue;
+                contract_v(best_v, i, g);
+                col_alive[col.st].erase(i);
+            }
+            col.nd = {best_v};
         }
-        for(int i : tmpv){
-            if(i == best_v) continue;
-            contract_v(best_v, i, g);
-            col_alive[col.st].erase(i);
-        }
-        col.nd = {best_v};
         g[best_v].del(idx, mc);
         g[best_v].add(idx, 0);
         if(col_alive[col.st].size() == 1){
@@ -180,22 +260,7 @@ void kill_v(int idx, vector<node> &g, vector<set<int>> &col_alive, queue<int> &t
     g[idx].mc = 0;
 }
 
-// void print_status(vector<set<int>> &col_alive, vector<node> &g){
-//     for(int i = 1; i < (int)col_alive.size(); i++){
-//         cout << "COLOR: " << i << ": ";
-//         for(int v : col_alive[i]){
-//             cout << v << " ";
-//         }
-//         cout << "\n";
-//         for(int v : col_alive[i]){
-//             cout << "edges " << v << ": ";
-//             for(int u : g[v]){
-//                 cout << u << " ";
-//             }
-//             cout << "\n";
-//         }
-//     }
-// }
+
 
 void solve(){
     int n, m, k;
@@ -211,6 +276,7 @@ void solve(){
     for(int i = 0; i < m; i++){
         int u,v;
         cin >> u >> v;
+        if(u == v) continue;
         g[u].add(v, g[v].mc);
         g[v].add(u, g[u].mc);
         // g[u].e[g[v].mc].insert(v);
@@ -226,29 +292,37 @@ void solve(){
 
     vector<set<int>> col_alive(k + 1);
     vector<int> contracted(n + 1, 0);
+    queue<int> to_del;
+
+    // print_g(g);
+
     for(int i = 1; i <= n; i++){
         if(!contracted[i]){
             col_alive[g[i].mc].insert(contract_cc(i, g[i].mc, contracted, g));
         }
     }
-    queue<int> to_del;
     for(int i = 1; i <= k; i++){
         if(col_alive[i].size() == 1){
             to_del.push((*(col_alive[i].begin())));
         }
     }
-    vector<map<int,int>> dead(2 * n + 2);
-    vector<set<int>> dead_friend(n + 1);
+    // print_status(g, col_alive, to_del);
+    // sleep(1);
+    // vector<map<int,int>> dead(2 * n + 2);
+    // vector<set<int>> dead_friend(n + 1);
     while(!to_del.empty()){
         int v = to_del.front();
         to_del.pop();
+        if(col_alive[g[v].mc].empty()) continue;
         col_alive[g[v].mc].erase(v);
 
         kill_v(v, g, col_alive, to_del);
+        // print_status(g, col_alive, to_del);
         contract_dead_cc(v, g, col_alive, to_del);
 
         // contract with v + n
         // contract with dead_friends
+        // print_status(g, col_alive, to_del);
     }
     for(int i = 1; i <= k; i++){
         if(col_alive[i].size() > 1){
@@ -262,6 +336,7 @@ void solve(){
 
 int32_t main(){
     BOOST;
+
     int t_; cin >> t_;
     while(t_--){
         solve();

@@ -60,10 +60,13 @@ if len(cpp_program) < 4 or cpp_program[-4:] != ".cpp":
     cpp_program += ".cpp"
 # print(cpp_program)
 
-compile_command = ["g++", cpp_program, "-o", "wzo_prog","-O2"] 
+# compile_command = ["g++", cpp_program, "-o", "wzo_prog","-O2"]
+compile_command = ["g++", cpp_program, "-o", "wzo_prog","-std=c++23", "-Wall", "-O3", "-Wextra", "-Wshadow", "-Wconversion", "-Wfloat-equal"]
+debug_compile_command = ["g++", cpp_program, "-o", "wzo_prog","-std=c++23", "-Wall", "-O0", "-Wextra", "-Wshadow", "-Wconversion", "-Wfloat-equal", "-g", "-fsanitize=address,undefined"]
 run_command = ["./wzo_prog"] 
  
-compile_process = subprocess.run(compile_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
+# compile_process = subprocess.run(compile_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
+compile_process = subprocess.run(debug_compile_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
  
 if compile_process.returncode == 0: 
     print("Compilation successful.") 
