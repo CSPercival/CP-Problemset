@@ -28,6 +28,7 @@ pair<pair<ll,int>, pair<ll,int>> check_next(int idx, vector<int> &p, vector<int>
             ans.st.nd = idx;
             ans.nd.st = diff;
             ans.nd.nd = i - h[idx] + 1;
+            break;
         }
     }
     return ans;
@@ -56,7 +57,7 @@ void solve(){
     pair<pair<ll,int>, pair<ll,int>> tmp;
     for(int i = 0; i < n; i++){
         tmp = check_next(i, p[i], r[i], h, m);
-        cout << tmp << "\n";
+        // cout << tmp << "\n";
         if(tmp.st.nd == -1) continue; 
         pq.push(tmp);
     }
@@ -68,7 +69,7 @@ void solve(){
             h[tmp.st.nd] += tmp.nd.nd;
             kasa += tmp.nd.st;
             tmp = check_next(tmp.st.nd, p[tmp.st.nd], r[tmp.st.nd], h, m);
-            cout << tmp << "\n";
+            // cout << tmp << "\n";
 
             if(tmp.st.nd == -1) continue; 
             pq.push(tmp);
@@ -81,7 +82,7 @@ void solve(){
         while(h[i] != m[i] && p[i][h[i]] <= tkasa){
             tkasa += r[i][h[i]] - p[i][h[i]];
             h[i]++;
-            cout << tkasa << " t\n";
+            // cout << tkasa << " t\n";
         }
         if(ans < h[i]){
             ans = h[i];
